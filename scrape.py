@@ -35,15 +35,18 @@ with conn.cursor() as cursor:
         url = tmp.find("a")["href"]
         sp = BeautifulSoup(requests.get(url).content)
         title = sp.find("h1").contents[0]
+        writer = []
+        for tmp in filter(lambda x: x.contents and "Writer" in x.contents[0], sp.find_all("div")):
+            writer = [a.contents[0].strip() for a in tmp.find_all("a")]
         tester = []
-        for tmp in filter(lambda x: x.contents and "tester" in x.contents[0], sp.find_all("p")):
+        for tmp in filter(lambda x: x.contents and "Tester" in x.contents[0], sp.find_all("p")):
             tester = [a.contents[0].strip() for a in tmp.find_all("a")]
         #元々存在するかどうかで場合分け
         if url in contest_urls:
             print("UPDATE", title)
-            sql = "UPDATE contest_info SET title = %s, schedule = %s, rated = %s, tester = %s WHERE url = %s"
+            sql = "UPDATE contest_info SET title = %s, schedule = %s, rated = %s, writer = %s, tester = %s WHERE url = %s"
         else:
             print("INSERT", title)
-            sql = "INSERT INTO contest_info (title, schedule, rated, tester, url) VALUES (%s, %s, %s, %s, %s)"
-        cursor.execute(sql, (title, schedule, rated, ",".join(tester), url))
+            sql = "INSERT INTO contest_info (title, schedule, rated, writer, tester, url) VALUES (%s, %s, %s, %s, %s, %s)"
+        cursor.execute(sql, (title, schedule, rated, ",".join(writer), ",".join(tester), url))
 conn.commit()

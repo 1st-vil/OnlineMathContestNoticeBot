@@ -33,14 +33,15 @@ with conn.cursor() as cursor:
     sql = "SELECT * FROM contest_info"
     cursor.execute(sql)
     for tmp in cursor:
-        day, time, _, _ = tmp["schedule"].split()
-        start_time = datetime.strptime(day + " " + time, "%Y-%m-%d %H:%M:%S")
+        day, _, time, _, _ = tmp["schedule"].split()
+        start_time = datetime.strptime(day + " " + time, "%Y-%m-%d %H:%M")
         cur_jp = datetime.now() + timedelta(hours=9)
         if cur_jp < start_time and cur_jp + timedelta(minutes=90) > start_time:
             res = []
             res.append(tmp["title"])
             res.append(tmp["schedule"])
             res.append(tmp["rated"])
+            res.append("writer: " + tmp["writer"])
             res.append("tester: " + tmp["tester"])
             res.append(tmp["url"])
             api.update_status("\n".join(res))
